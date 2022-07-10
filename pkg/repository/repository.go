@@ -1,19 +1,27 @@
 package repository
 
-import "database/sql"
+import (
+	awesomeproject "awesomeProject"
+	"database/sql"
+)
 
-type ProxyPorts interface{
+type ProxyPorts interface {
 	// return id of slugfield in db or error
-	CreateSlugUrl(routerPort string)(int, string, error)
+	GenerateSlug(portId int) (int, string, error)
 	GetIdBySlug(slug string) (int, error)
-	UpdateReconnectInterval(portId string , minutes string)(int, error)
+	UpdateReconnectInterval(portId int, minutes string) (int, error)
+	// CreatePort()
 }
 
-type Repository struct{
+type Authorization interface {
+	CreateUser(user awesomeproject.User) (int, error)
+}
+
+type Repository struct {
 	ProxyPorts
 }
 
-func NewRepository(db *sql.DB) *Repository{
+func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
 		ProxyPorts: NewProxyPortItem(db),
 	}

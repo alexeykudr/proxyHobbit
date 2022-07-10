@@ -2,14 +2,10 @@ package handler
 
 import (
 	"awesomeProject/pkg/repository"
-	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"os/exec"
-	"time"
+	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -34,33 +30,13 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request, _ httprout
 	w.Write(jsonResp)
 }
 
-func ping(ctx context.Context, ip string) {
-	cmd := exec.CommandContext(ctx, "ping", ip, "-t")
-	cmd.Stdout = os.Stdin
-
-	go cmd.Run()
-	<-ctx.Done()
-	fmt.Println("Pid of procces", cmd.Process.Pid)
-	cmd.Process.Kill()
-}
-
-func (h *Handler) execProxyCommand() {
-	ctx, cancel := context.WithTimeout(context.Background(), 5500*time.Millisecond)
-	defer cancel()
-
-	if err := exec.CommandContext(ctx, "sleep", "5").Run(); err != nil {
-		log.Fatalf("Error in execProxyCommand %s", err.Error())
-		fmt.Println("err!")
-	}
-}
-
 func (h *Handler) reconnectHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	data, _ := h.repository.ProxyPorts.GetIdBySlug(ps.ByName("url"))
 
 	resp := make(map[int]string)
 	if data != 0 {
 		// INSERT LOGIC OF RUNING REBOOT OF ROUTER
-		resp[data] = "now reloading!"
+		resp[data+10] = "Porn reloading now!"
 
 		// TODO handel h error
 		h.execProxyCommand()
@@ -86,9 +62,12 @@ func (h *Handler) generateSlug(w http.ResponseWriter, r *http.Request, ps httpro
 	r.ParseForm()
 	s := r.Form
 	request_port := s["id"]
+
+	a, _ := strconv.Atoi(request_port[0])
+	system_port_id := a
 	// fmt.Println(request_port)
 
-	portId, actualUrl, err := h.repository.ProxyPorts.CreateSlugUrl(request_port[0])
+	portId, actualUrl, err := h.repository.ProxyPorts.GenerateSlug(system_port_id)
 
 	if err != nil {
 		// log.Printf("Error happened in CreatingSlug Err: %s", err)
@@ -126,13 +105,16 @@ func (h *Handler) generateSlug(w http.ResponseWriter, r *http.Request, ps httpro
 func (h *Handler) updateInterval(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	r.ParseForm()
 	s := r.Form
-	portId := s["portId"][0]
+	portId := s["id"][0]
 	interval := s["interval"][0]
+
+	a, _ := strconv.Atoi(portId)
+	system_port_id := a
 
 	// fmt.Printf("%T\n", portId)
 	// fmt.Println(portId, interval)
 
-	_, err := h.repository.UpdateReconnectInterval(portId, interval)
+	_, err := h.repository.UpdateReconnectInterval(system_port_id, interval)
 	// fmt.Println(id)
 
 	if err != nil {
@@ -168,6 +150,5 @@ func (h *Handler) InitRoutes() *httprouter.Router {
 	router.GET("/generateSlug/", h.generateSlug)
 	router.POST("/updateInterval", h.updateInterval)
 
-	// log.Fatal(http.ListenAndServe(":8080", router))
 	return router
 }

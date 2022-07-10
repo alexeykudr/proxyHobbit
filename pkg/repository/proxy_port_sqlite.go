@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+
+	// "strconv"
 	"time"
 )
 
@@ -23,15 +25,20 @@ func randomString(length int) string {
 	return fmt.Sprintf("%x", b)[:length]
 }
 
-func (r *ProxyPortItemSQLite) CreateSlugUrl(routerPort string) (int, string, error) {
+func (r *ProxyPortItemSQLite) GenerateSlug(routerPort int) (int, string, error) {
 	var s_data int
 	random_string := randomString(12)
 	// UPDATE proxyPorts SET generatedUrl = 'tmp' WHERE id = 3
-	err := r.db.QueryRow("UPDATE proxyPorts SET generatedUrl = ? where id = ? RETURNING id", random_string,
-		routerPort).Scan(&s_data)
+
+	// router_port_id := 11
+
+	// a, _ := strconv.Atoi(routerPort)
+
+	err := r.db.QueryRow("UPDATE proxyPorts SET generatedUrl = ? where router_id = ? RETURNING id",
+		random_string, routerPort).Scan(&s_data)
 
 	if err != nil {
-		log.Printf("error in CreateSlugUrl with port %s", routerPort)
+		log.Printf("error in GenerateSlug with port %d", routerPort)
 		return 0, "error", err
 	}
 	return s_data, random_string, nil
@@ -47,13 +54,13 @@ func (r *ProxyPortItemSQLite) GetIdBySlug(slug string) (int, error) {
 	return s_data, nil
 }
 
-func (r *ProxyPortItemSQLite) UpdateReconnectInterval(portId string, intervalInMin string) (int, error) {
+func (r *ProxyPortItemSQLite) UpdateReconnectInterval(portId int, intervalInMin string) (int, error) {
 	var s_data int
-	err := r.db.QueryRow("UPDATE proxyPorts SET interval = ? where id = ? RETURNING id", intervalInMin,
+	err := r.db.QueryRow("UPDATE proxyPorts SET interval = ? where router_id = ? RETURNING id", intervalInMin,
 		portId).Scan(&s_data)
 
 	if err != nil {
-		log.Printf("error in UpdateReconectInterval with port %s , min interval %s", portId, intervalInMin)
+		log.Printf("error in UpdateReconectInterval with port %d , min interval %s", portId, intervalInMin)
 		// return 0, err
 	}
 	// плохой айди - вылетаем
