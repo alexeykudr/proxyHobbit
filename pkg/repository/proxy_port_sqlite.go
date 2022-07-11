@@ -25,6 +25,10 @@ func randomString(length int) string {
 	return fmt.Sprintf("%x", b)[:length]
 }
 
+func randomInt(length int) int {
+	return rand.Intn(length)
+}
+
 func (r *ProxyPortItemSQLite) GenerateSlug(routerPort int) (int, string, error) {
 	var s_data int
 	random_string := randomString(12)
@@ -61,9 +65,24 @@ func (r *ProxyPortItemSQLite) UpdateReconnectInterval(portId int, intervalInMin 
 
 	if err != nil {
 		log.Printf("error in UpdateReconectInterval with port %d , min interval %s", portId, intervalInMin)
-		// return 0, err
+		return 0, err
 	}
 	// плохой айди - вылетаем
 
 	return s_data, err
+}
+
+func (r *ProxyPortItemSQLite) CreateSimpleUser(username string, password string) (string, error) {
+	// 	INSERT INTO users (username, password)
+	// VALUES ("testuser2", "1234");
+	var username_data string
+	// Calling Sprintf() function
+	// s := fmt.Sprintf("%s is a %s Portal.\n", name, dept)
+
+	stmt, err := r.db.Exec("INSERT INTO users(username, password) VALUES(?, ?) RETURNING id", username, password)
+	fmt.Println(stmt)
+	fmt.Println(err)
+	// convert stmt to id
+	// https://pkg.go.dev/database/sql#DB.Exec
+	return username_data, nil
 }

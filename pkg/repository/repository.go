@@ -1,7 +1,6 @@
 package repository
 
 import (
-	awesomeproject "awesomeProject"
 	"database/sql"
 )
 
@@ -10,11 +9,7 @@ type ProxyPorts interface {
 	GenerateSlug(portId int) (int, string, error)
 	GetIdBySlug(slug string) (int, error)
 	UpdateReconnectInterval(portId int, minutes string) (int, error)
-	// CreatePort()
-}
-
-type Authorization interface {
-	CreateUser(user awesomeproject.User) (int, error)
+	CreateSimpleUser(username, password string) (string, error)
 }
 
 type Repository struct {

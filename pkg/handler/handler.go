@@ -3,6 +3,9 @@ package handler
 import (
 	"awesomeProject/pkg/repository"
 	"encoding/json"
+	"fmt"
+
+	// "fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -114,7 +117,7 @@ func (h *Handler) updateInterval(w http.ResponseWriter, r *http.Request, ps http
 	// fmt.Printf("%T\n", portId)
 	// fmt.Println(portId, interval)
 
-	_, err := h.repository.UpdateReconnectInterval(system_port_id, interval)
+	returned_interval, err := h.repository.UpdateReconnectInterval(system_port_id, interval)
 	// fmt.Println(id)
 
 	if err != nil {
@@ -134,13 +137,38 @@ func (h *Handler) updateInterval(w http.ResponseWriter, r *http.Request, ps http
 	w.WriteHeader(http.StatusAccepted)
 	w.Header().Set("Content-Type", "application/json")
 
-	resp := make(map[string]string)
-	resp["message"] = "Status OK"
+	resp := make(map[string]int)
+	resp["message"] = returned_interval
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
 		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
 	}
 	w.Write(jsonResp)
+}
+
+type test_struct struct {
+	Test string
+}
+
+func (h *Handler) createUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+	// decoder := json.NewDecoder(r.Body)
+	// var t test_struct
+	// err := decoder.Decode(&t)
+	// if err != nil {
+	//     panic(err)
+	// }
+	// log.Println(t.Test)
+
+	r.ParseForm()
+	s := r.Form
+	username := s["login"][0]
+	password := s["password"][0]
+	resp, _ := h.repository.CreateSimpleUser(username, password)
+
+	fmt.Println(username, password)
+	fmt.Println(resp)
+	// TODO UNIQ USERS
 }
 
 func (h *Handler) InitRoutes() *httprouter.Router {
@@ -149,6 +177,7 @@ func (h *Handler) InitRoutes() *httprouter.Router {
 	router.GET("/reboot/:url", h.reconnectHandler)
 	router.GET("/generateSlug/", h.generateSlug)
 	router.POST("/updateInterval", h.updateInterval)
-
+	router.POST("/createUser", h.createUser)
+	// router.POST isert into db (createProxyPort)
 	return router
 }
