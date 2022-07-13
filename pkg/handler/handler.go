@@ -3,9 +3,6 @@ package handler
 import (
 	"awesomeProject/pkg/repository"
 	"encoding/json"
-	"fmt"
-
-	// "fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -33,13 +30,13 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request, _ httprout
 	w.Write(jsonResp)
 }
 
-func (h *Handler) reconnectHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (h *Handler) rebootByUrl(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	data, _ := h.repository.ProxyPorts.GetIdBySlug(ps.ByName("url"))
 
 	resp := make(map[int]string)
 	if data != 0 {
 		// INSERT LOGIC OF RUNING REBOOT OF ROUTER
-		resp[data+10] = "Porn reloading now!"
+		resp[data+10] = "Proxy reloading now!"
 
 		// TODO handel h error
 		h.execProxyCommand()
@@ -164,17 +161,38 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request, ps httprout
 	s := r.Form
 	username := s["login"][0]
 	password := s["password"][0]
-	resp, _ := h.repository.CreateSimpleUser(username, password)
+	err := h.repository.CreateSimpleUser(username, password)
 
-	fmt.Println(username, password)
-	fmt.Println(resp)
+	w.Header().Set("Content-Type", "application/json")
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		resp := make(map[string]string)
+		resp["message"] = "Bad Request"
+		jsonResp, err := json.Marshal(resp)
+		if err != nil {
+			log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+		}
+		w.Write(jsonResp)
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+	resp := make(map[string]string)
+	resp["message"] = "Ok"
+	jsonResp, err := json.Marshal(resp)
+	if err != nil {
+		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	}
+	w.Write(jsonResp)
+
 	// TODO UNIQ USERS
 }
 
 func (h *Handler) InitRoutes() *httprouter.Router {
 	router := httprouter.New()
 	router.GET("/", h.HealthCheck)
-	router.GET("/reboot/:url", h.reconnectHandler)
+	router.GET("/reboot/:url", h.rebootByUrl)
 	router.GET("/generateSlug/", h.generateSlug)
 	router.POST("/updateInterval", h.updateInterval)
 	router.POST("/createUser", h.createUser)

@@ -3,10 +3,12 @@ package handler
 import (
 	"context"
 	"fmt"
-	"log"
+	"time"
+
+	// "log"
 	"os"
 	"os/exec"
-	"time"
+	// "time"
 )
 
 func ping(ctx context.Context, ip string) {
@@ -19,12 +21,14 @@ func ping(ctx context.Context, ip string) {
 	cmd.Process.Kill()
 }
 
+// /home/mac/goServer/reconect.sh
+
 func (h *Handler) execProxyCommand() {
-	ctx, cancel := context.WithTimeout(context.Background(), 5500*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	if err := exec.CommandContext(ctx, "sleep", "5").Run(); err != nil {
-		log.Fatalf("Error in execProxyCommand %s", err.Error())
-		fmt.Println("err!")
+	if err := exec.CommandContext(ctx, "/bin/sh", "/home/mac/goServer/test.sh", "24").Run(); err != nil {
+		fmt.Println("Error by context executor router rebooter!")
 	}
+
 }

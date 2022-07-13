@@ -9,7 +9,7 @@ type ProxyPorts interface {
 	GenerateSlug(portId int) (int, string, error)
 	GetIdBySlug(slug string) (int, error)
 	UpdateReconnectInterval(portId int, minutes string) (int, error)
-	CreateSimpleUser(username, password string) (string, error)
+	CreateSimpleUser(username, password string) (error)
 }
 
 type Repository struct {

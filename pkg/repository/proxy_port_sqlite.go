@@ -32,8 +32,6 @@ func randomInt(length int) int {
 func (r *ProxyPortItemSQLite) GenerateSlug(routerPort int) (int, string, error) {
 	var s_data int
 	random_string := randomString(12)
-	// UPDATE proxyPorts SET generatedUrl = 'tmp' WHERE id = 3
-
 	// router_port_id := 11
 
 	// a, _ := strconv.Atoi(routerPort)
@@ -72,17 +70,17 @@ func (r *ProxyPortItemSQLite) UpdateReconnectInterval(portId int, intervalInMin 
 	return s_data, err
 }
 
-func (r *ProxyPortItemSQLite) CreateSimpleUser(username string, password string) (string, error) {
-	// 	INSERT INTO users (username, password)
-	// VALUES ("testuser2", "1234");
-	var username_data string
-	// Calling Sprintf() function
-	// s := fmt.Sprintf("%s is a %s Portal.\n", name, dept)
+func (r *ProxyPortItemSQLite) CreateSimpleUser(username string, password string) (error) {
+	stmt, err := r.db.Prepare("INSERT INTO users(username, password) VALUES(?, ?)")
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+	defer stmt.Close() // Prepared statements take up server resources and should be closed after use.
 
-	stmt, err := r.db.Exec("INSERT INTO users(username, password) VALUES(?, ?) RETURNING id", username, password)
-	fmt.Println(stmt)
-	fmt.Println(err)
-	// convert stmt to id
+	if _, err := stmt.Exec(username, password); err != nil {
+		log.Println(err.Error())
+	}
 	// https://pkg.go.dev/database/sql#DB.Exec
-	return username_data, nil
+	return nil
 }
