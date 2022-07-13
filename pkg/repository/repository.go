@@ -6,7 +6,7 @@ import (
 
 type ProxyPorts interface {
 	// return id of slugfield in db or error
-	GenerateSlug(portId int) (int, string, error)
+	GenerateSlug(portId string) (int, string, error)
 	GetIdBySlug(slug string) (int, error)
 	UpdateReconnectInterval(portId int, minutes string) (int, error)
 	CreateSimpleUser(username, password string) (error)

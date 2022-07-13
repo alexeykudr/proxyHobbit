@@ -23,12 +23,14 @@ func ping(ctx context.Context, ip string) {
 
 // /home/mac/goServer/reconect.sh
 
-func (h *Handler) execProxyCommand() {
+func (h *Handler) execProxyCommand(portId string)(error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	if err := exec.CommandContext(ctx, "/bin/sh", "/home/mac/goServer/test.sh", "24").Run(); err != nil {
 		fmt.Println("Error by context executor router rebooter!")
+		return err
 	}
+	return nil
 
 }

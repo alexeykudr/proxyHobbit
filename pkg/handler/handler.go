@@ -3,6 +3,7 @@ package handler
 import (
 	"awesomeProject/pkg/repository"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -31,15 +32,17 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request, _ httprout
 }
 
 func (h *Handler) rebootByUrl(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	data, _ := h.repository.ProxyPorts.GetIdBySlug(ps.ByName("url"))
+	router_id, _ := h.repository.ProxyPorts.GetIdBySlug(ps.ByName("url"))
 
 	resp := make(map[int]string)
-	if data != 0 {
+	if router_id != 0 {
 		// INSERT LOGIC OF RUNING REBOOT OF ROUTER
-		resp[data+10] = "Proxy reloading now!"
+		resp[router_id] = "Proxy reloading now!"
 
 		// TODO handel h error
-		h.execProxyCommand()
+		// select router id where generatedUrl = data
+		str_router_id := strconv.Itoa(router_id)
+		h.execProxyCommand(str_router_id)
 		w.WriteHeader(http.StatusOK)
 	} else {
 		resp[-1] = "error, cant find"
@@ -59,19 +62,19 @@ func (h *Handler) rebootByUrl(w http.ResponseWriter, r *http.Request, ps httprou
 
 func (h *Handler) generateSlug(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
-	r.ParseForm()
-	s := r.Form
-	request_port := s["id"]
+	// r.ParseForm()
+	// s := r.Form
+	// request_port := s["id"]
+	request_port := ps.ByName("id")
+	fmt.Println(request_port)
 
-	a, _ := strconv.Atoi(request_port[0])
-	system_port_id := a
+	// a, _ := strconv.Atoi(request_port[0])
+	// system_port_id := a
 	// fmt.Println(request_port)
 
-	portId, actualUrl, err := h.repository.ProxyPorts.GenerateSlug(system_port_id)
+	portId, actualUrl, err := h.repository.ProxyPorts.GenerateSlug(request_port)
 
 	if err != nil {
-		// log.Printf("Error happened in CreatingSlug Err: %s", err)
-		log.Println(err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		w.Header().Set("Content-Type", "application/json")
 		resp := make(map[string]string)
@@ -193,7 +196,7 @@ func (h *Handler) InitRoutes() *httprouter.Router {
 	router := httprouter.New()
 	router.GET("/", h.HealthCheck)
 	router.GET("/reboot/:url", h.rebootByUrl)
-	router.GET("/generateSlug/", h.generateSlug)
+	router.GET("/generateSlug/:id", h.generateSlug)
 	router.POST("/updateInterval", h.updateInterval)
 	router.POST("/createUser", h.createUser)
 	// router.POST isert into db (createProxyPort)

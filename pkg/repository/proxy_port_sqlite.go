@@ -29,7 +29,7 @@ func randomInt(length int) int {
 	return rand.Intn(length)
 }
 
-func (r *ProxyPortItemSQLite) GenerateSlug(routerPort int) (int, string, error) {
+func (r *ProxyPortItemSQLite) GenerateSlug(routerPort string) (int, string, error) {
 	var s_data int
 	random_string := randomString(12)
 	// router_port_id := 11
@@ -40,7 +40,7 @@ func (r *ProxyPortItemSQLite) GenerateSlug(routerPort int) (int, string, error) 
 		random_string, routerPort).Scan(&s_data)
 
 	if err != nil {
-		log.Printf("error in GenerateSlug with port %d", routerPort)
+		log.Printf("error in GenerateSlug with port %s", routerPort)
 		return 0, "error", err
 	}
 	return s_data, random_string, nil
@@ -48,7 +48,7 @@ func (r *ProxyPortItemSQLite) GenerateSlug(routerPort int) (int, string, error) 
 
 func (r *ProxyPortItemSQLite) GetIdBySlug(slug string) (int, error) {
 	var s_data int
-	err := r.db.QueryRow("select id from proxyPorts where generatedUrl = ?", slug).Scan(&s_data)
+	err := r.db.QueryRow("select router_id from proxyPorts where generatedUrl = ?", slug).Scan(&s_data)
 	if err != nil {
 		log.Printf("error in GetIdBySlug with slug %s", slug)
 		return 0, err
