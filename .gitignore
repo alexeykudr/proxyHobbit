@@ -2,3 +2,5 @@
 tmp
 vendor
 venv
+testDB.db
+.db

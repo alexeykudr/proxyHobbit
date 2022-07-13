@@ -36,7 +36,7 @@ func (r *ProxyPortItemSQLite) GenerateSlug(routerPort string) (int, string, erro
 
 	// a, _ := strconv.Atoi(routerPort)
 
-	err := r.db.QueryRow("UPDATE proxyPorts SET generatedUrl = ? where router_id = ? RETURNING id",
+	err := r.db.QueryRow("UPDATE proxyPorts SET generatedUrl = ? where router_id = ? RETURNING router_id",
 		random_string, routerPort).Scan(&s_data)
 
 	if err != nil {
@@ -70,7 +70,7 @@ func (r *ProxyPortItemSQLite) UpdateReconnectInterval(portId int, intervalInMin 
 	return s_data, err
 }
 
-func (r *ProxyPortItemSQLite) CreateSimpleUser(username string, password string) (error) {
+func (r *ProxyPortItemSQLite) CreateSimpleUser(username string, password string) error {
 	stmt, err := r.db.Prepare("INSERT INTO users(username, password) VALUES(?, ?)")
 	if err != nil {
 		log.Println(err.Error())

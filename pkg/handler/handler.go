@@ -3,7 +3,6 @@ package handler
 import (
 	"awesomeProject/pkg/repository"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -66,8 +65,6 @@ func (h *Handler) generateSlug(w http.ResponseWriter, r *http.Request, ps httpro
 	// s := r.Form
 	// request_port := s["id"]
 	request_port := ps.ByName("id")
-	fmt.Println(request_port)
-
 	// a, _ := strconv.Atoi(request_port[0])
 	// system_port_id := a
 	// fmt.Println(request_port)
