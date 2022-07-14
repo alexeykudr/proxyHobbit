@@ -1,5 +1,7 @@
 from crontab import CronTab
 cron = CronTab(user='mac')
-job = cron.new(command="echo 'hello_world'")
-job.minute.every(1)
+job = cron.new(command="/home/mac/goServer/24.sh")
+job.minute.every(2)
 cron.write()
+
+# */2 * * * * /home/mac/goServer/24.sh
