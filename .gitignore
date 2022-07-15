@@ -4,3 +4,4 @@ vendor
 venv
 testDB.db
 .db
+env
