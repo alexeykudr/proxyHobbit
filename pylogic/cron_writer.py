@@ -29,7 +29,6 @@ class CronJob():
         self.cron.remove(iter)
         self.cron.write()
 
-
 if __name__ == "__main__":
     
     c= CronJob()

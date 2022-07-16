@@ -38,5 +38,5 @@ func main() {
 	repo := repository.NewRepository(db)
 	handler := handler.NewHandler(repo)
 
-	log.Fatal(http.ListenAndServe(":8080", handler.InitRoutes()))
+	log.Fatal(http.ListenAndServe(":8081", handler.InitRoutes()))
 }

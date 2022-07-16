@@ -3,6 +3,7 @@ package handler
 import (
 	"awesomeProject/pkg/repository"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -26,7 +27,7 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request, _ httprout
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
 		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
-		
+
 	}
 	w.Write(jsonResp)
 }
@@ -187,7 +188,22 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 	w.Write(jsonResp)
 
-	// TODO UNIQ USERS
+}
+
+func (h *Handler) removeIntervalredirect(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	q := ps.ByName("id")
+	redirect_url := fmt.Sprintf("http://127.0.0.1:5000/removeInterval/%s", q)
+	http.Redirect(w, r, redirect_url, 301)
+}
+func (h *Handler) updateIntervalredirect(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	r.ParseForm()
+	s := r.Form
+	id := s["id"][0]
+	interval := s["interval"][0]
+	fmt.Println(id, interval)
+	redirect_url := fmt.Sprintf("http://127.0.0.1:5000/updateInterval")
+	// fmt.Println(redirect_url)
+	http.Redirect(w, r, redirect_url, 301)
 }
 
 func (h *Handler) InitRoutes() *httprouter.Router {
@@ -195,8 +211,10 @@ func (h *Handler) InitRoutes() *httprouter.Router {
 	router.GET("/", h.HealthCheck)
 	router.GET("/reboot/:url", h.rebootByUrl)
 	router.GET("/generateSlug/:id", h.generateSlug)
-	router.POST("/updateInterval", h.updateInterval)
+	// router.POST("/updateInterval", h.updateInterval)
 	router.POST("/createUser", h.createUser)
+	router.GET("/deleteReloadingId/:id", h.removeIntervalredirect)
+	router.GET("/updateInterval", h.updateIntervalredirect)
 	// router.POST isert into db (createProxyPort)
 	return router
 }

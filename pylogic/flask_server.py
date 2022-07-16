@@ -3,7 +3,7 @@ from flask import request
 import os
 from crontab import CronTab
 import sys
-
+import subprocess
 
 # https://pypi.org/project/python-crontab/
 
@@ -32,47 +32,59 @@ class CronJob():
         self.cron.remove(iter)
         self.cron.write()
 
+class Rebooter():
+    def __init__(self) -> None:
+        user_login = os.getlogin()
+        
+    def rebootRouter(self, id):
+        result = subprocess.run(["/bin/bash", "/home/{}/proxyHobbit/reload.sh".format(self.user_login), "{}".format(id)],
+                        timeout=15, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return result
+
 
 
 app = Flask(__name__)
 @app.route("/")
 def hello():
-    return "Flask inside Docker!!"
+    return {"Ok":"True"}
 
-@app.route('/updateInterval', methods=['GET'])
+@app.route('/updateInterval/', methods=['GET'])
 def updateInterval():
     if request.method == 'GET':
-        id = request.json['id']
-        interval = request.json['interval']
-        
+        id = request.args.get('id')
+        interval = request.args.get('interval')
+        print(id, interval)
         if id and interval:
-            c.newJob(id, interval)      
+            cron_object.newJob(id, interval)
             return {id:interval}
         
         return {"Message":"Bad request!"}
 
-@app.route('/removeInterval', methods=['GET'])
+@app.route('/removeInterval/', methods=['GET'])
 def removeInterval():
     if request.method == 'GET':
-        id = request.json['id']
+        id = request.args.get('id')
         if id:
-            c.removeJob(id)
+            cron_object.removeJob(id)
+            return {"id": id}
+        
+        return {"Message":"Bad request!"}
+
+@app.route('/rebootPort/', methods=['GET'])
+def rebootPort():
+    if request.method == 'GET':
+        id = request.args.get('id')
+        if id:
+            rebooter_object.rebootRouter(id)
             return {"id": id}
         
         return {"Message":"Bad request!"}
     
     
 if __name__ == "__main__":
-    c = CronJob()
+    cron_object = CronJob()
+    rebooter_object = Rebooter()
     # python3 cron.py -add 15 25
-    # python3 cron.py -rm 15 
-    # if sys.argv[1] == '-add':
-    #     if sys.argv[2] and sys.argv[3]:
-    #         # add job port id interval
-    #          c.newJob(sys.argv[2], sys.argv[3])
-    # if sys.argv[1] == '-rm':
-    #     if sys.argv[2]:
-    #         c.removeJob(sys.argv[2])
-    
+    # 15 - portId , 25 - interval
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=True,host='0.0.0.0',port=port)
