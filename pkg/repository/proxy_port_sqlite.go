@@ -10,12 +10,12 @@ import (
 	"time"
 )
 
-type ProxyPortItemSQLite struct {
+type ProxyPortSQLite struct {
 	db *sql.DB
 }
 
-func NewProxyPortItem(db *sql.DB) *ProxyPortItemSQLite {
-	return &ProxyPortItemSQLite{db: db}
+func NewProxyPortItem(db *sql.DB) *ProxyPortSQLite {
+	return &ProxyPortSQLite{db: db}
 }
 
 func randomString(length int) string {
@@ -25,11 +25,7 @@ func randomString(length int) string {
 	return fmt.Sprintf("%x", b)[:length]
 }
 
-func randomInt(length int) int {
-	return rand.Intn(length)
-}
-
-func (r *ProxyPortItemSQLite) GenerateSlug(routerPort string) (int, string, error) {
+func (r *ProxyPortSQLite) GenerateSlug(routerPort string) (int, string, error) {
 	var s_data int
 	random_string := randomString(12)
 	// router_port_id := 11
@@ -43,10 +39,11 @@ func (r *ProxyPortItemSQLite) GenerateSlug(routerPort string) (int, string, erro
 		log.Printf("error in GenerateSlug with port %s", routerPort)
 		return 0, "error", err
 	}
+	// returning port id, generated url or error
 	return s_data, random_string, nil
 }
 
-func (r *ProxyPortItemSQLite) GetIdBySlug(slug string) (int, error) {
+func (r *ProxyPortSQLite) GetIdBySlug(slug string) (int, error) {
 	var s_data int
 	err := r.db.QueryRow("select router_id from proxyPorts where generatedUrl = ?", slug).Scan(&s_data)
 	if err != nil {
@@ -56,7 +53,7 @@ func (r *ProxyPortItemSQLite) GetIdBySlug(slug string) (int, error) {
 	return s_data, nil
 }
 
-func (r *ProxyPortItemSQLite) UpdateReconnectInterval(portId int, intervalInMin string) (int, error) {
+func (r *ProxyPortSQLite) UpdateReconnectInterval(portId int, intervalInMin string) (int, error) {
 	var s_data int
 	err := r.db.QueryRow("UPDATE proxyPorts SET interval = ? where router_id = ? RETURNING id", intervalInMin,
 		portId).Scan(&s_data)
@@ -70,15 +67,15 @@ func (r *ProxyPortItemSQLite) UpdateReconnectInterval(portId int, intervalInMin 
 	return s_data, err
 }
 
-func (r *ProxyPortItemSQLite) CreateSimpleUser(username string, password string) error {
-	stmt, err := r.db.Prepare("INSERT INTO users(username, password) VALUES(?, ?)")
+func (r *ProxyPortSQLite) CreateSimpleUser(id string, username string, password string) error {
+	stmt, err := r.db.Prepare("INSERT INTO users(username, password, order_id) VALUES(?, ?, ?)")
 	if err != nil {
 		log.Println(err.Error())
 		return err
 	}
 	defer stmt.Close() // Prepared statements take up server resources and should be closed after use.
 
-	if _, err := stmt.Exec(username, password); err != nil {
+	if _, err := stmt.Exec(username, password, id); err != nil {
 		log.Println(err.Error())
 	}
 	// https://pkg.go.dev/database/sql#DB.Exec

@@ -3,8 +3,6 @@ package handler
 import (
 	"context"
 	"fmt"
-	"time"
-
 	// "log"
 	"os"
 	"os/exec"
@@ -21,16 +19,3 @@ func ping(ctx context.Context, ip string) {
 	cmd.Process.Kill()
 }
 
-// /home/mac/goServer/reconect.sh
-
-func (h *Handler) execProxyCommand(portId string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	if err := exec.CommandContext(ctx, "/bin/bash", "/home/mac/proxyHobbit/reload.sh", portId).Run(); err != nil {
-		fmt.Println("Error by context executor router rebooter!")
-		return err
-	}
-	return nil
-
-}
