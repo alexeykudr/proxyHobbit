@@ -4,18 +4,11 @@ import (
 	"awesomeProject/pkg/handler"
 	"awesomeProject/pkg/repository"
 	"database/sql"
-
 	// "fmt"
 	"log"
 	"net/http"
-
 	_ "github.com/mattn/go-sqlite3"
 )
-
-// TODO
-// init sqllite db
-// start server
-// create pkg/service,handler,repo
 
 func NewSqlLiteDB() (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", "./testDB.db")
@@ -38,5 +31,5 @@ func main() {
 	repo := repository.NewRepository(db)
 	handler := handler.NewHandler(repo)
 
-	log.Fatal(http.ListenAndServe(":8081", handler.InitRoutes()))
+	log.Fatal(http.ListenAndServe(":7500", handler.InitRoutes()))
 }
