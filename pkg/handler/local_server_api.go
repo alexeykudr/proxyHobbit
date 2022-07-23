@@ -9,8 +9,9 @@ import (
 	"net/url"
 )
 
-// const requestURL = "http://46.227.245.119:8081/"
-const requestURL = "http://127.0.0.1:8081/"
+const requestURL = "http://46.227.245.119:8081/"
+
+// const requestURL = "http://127.0.0.1:8081/"
 
 func HealthCheck() {
 	start_url := fmt.Sprintf("%s%s", requestURL, "")
@@ -33,7 +34,7 @@ func HealthCheck() {
 	log.Printf("client: response body: %s\n", string(resBody))
 }
 func Reboot(portId string) (string, error) {
-	start_url := fmt.Sprintf("%s%s", requestURL, "reboot")
+	start_url := fmt.Sprintf("%s%s", requestURL, "rebootPort")
 	req, err := http.NewRequest(http.MethodGet, start_url, nil)
 	if err != nil {
 		log.Printf("client: could not create request: %s\n", err)
@@ -54,7 +55,7 @@ func Reboot(portId string) (string, error) {
 	if err != nil {
 		log.Printf("%s", err.Error())
 	}
-	
+
 	return string(resBody), err
 }
 
@@ -116,7 +117,7 @@ func DeleteInterval(id string) {
 	fmt.Printf("client: response body: %s\n", string(resBody))
 }
 
-func SetConfig(id, login, password string)(error) {
+func SetConfig(id, login, password string) error {
 	path := "setConfig"
 	start_url := fmt.Sprintf("%s%s", requestURL, path)
 
